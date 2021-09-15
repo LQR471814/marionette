@@ -1,6 +1,6 @@
 ## marionette
 
-A tiny package exposing the default browser executable for usage cross platform.
+A tiny package for manipulating the default browser cross platform.
 
 ### Usage
 
