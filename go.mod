@@ -1,4 +1,4 @@
-module marionette
+module github.com/LQR471814/marionette
 
 go 1.17
 
