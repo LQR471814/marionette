@@ -61,8 +61,5 @@ func OpenBrowser(args ...string) error {
 		return err
 	}
 
-	cmd := exec.Command(path, args...)
-	cmd.Run()
-
-	return nil
+	return exec.Command(path, args...).Run()
 }
