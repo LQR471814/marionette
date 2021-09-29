@@ -3,7 +3,8 @@ package marionette
 type BrowserType int
 
 const (
-	CHROME BrowserType = iota
+	UNDEFINED BrowserType = iota
+	CHROME
 	EDGE
 	FIREFOX
 )

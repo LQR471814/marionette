@@ -1,36 +1,51 @@
 package marionette
 
 import (
+	"fmt"
 	"os/exec"
 	"regexp"
+	"strings"
 )
 
-var defaultBrowserMap map[string]string = map[string]string{
-	"firefox": "firefox",
-	"chrome":  "google-chrome",
+var browserWhichQuery map[BrowserType]string = map[BrowserType]string{
+	CHROME:  "google-chrome",
+	FIREFOX: "firefox",
+}
+
+var idMap map[string]BrowserType = map[string]BrowserType{
+	"chrome":  CHROME,
+	"firefox": FIREFOX,
+}
+
+func DefaultBrowser() (BrowserType, error) {
+	defaultBrowser, err := exec.Command("xdg-settings", "get", "default-web-browser").Output()
+	if err != nil {
+		return UNDEFINED, err
+	}
+
+	for key := range idMap {
+		matches, err := regexp.MatchString(key, string(defaultBrowser))
+		if err != nil {
+			return UNDEFINED, err
+		}
+
+		if matches {
+			return idMap[key], nil
+		}
+	}
+
+	return UNDEFINED, &UnknownBrowserType{}
 }
 
 func GetBrowserPath() (string, error) {
-	defaultBrowser, err := exec.Command("xdg-settings", "get", "default-web-browser").Output()
+	browser, err := DefaultBrowser()
 	if err != nil {
 		return "", err
 	}
 
-	browser := ""
-	for key := range defaultBrowserMap {
-		matched, err := regexp.Match(key, defaultBrowser)
-		if err != nil {
-			return "", err
-		}
-
-		if matched {
-			browser = defaultBrowserMap[key]
-			break
-		}
-	}
-
-	path, err := exec.Command("which", browser).Output()
-	return string(path), err
+	path, err := exec.Command("which", browserWhichQuery[browser]).Output()
+	pathStr := strings.TrimSpace(string(path))
+	return pathStr, err
 }
 
 func OpenBrowser(args ...string) error {
@@ -38,6 +53,8 @@ func OpenBrowser(args ...string) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(args)
 
 	return exec.Command(path, args...).Run()
 }

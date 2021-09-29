@@ -31,9 +31,10 @@ func main() {
 
 ```go
 const (
-    CHROME BrowserType = iota
-    EDGE
-    FIREFOX
+	UNDEFINED BrowserType = iota
+	CHROME
+	EDGE
+	FIREFOX
 )
 ```
 
