@@ -32,23 +32,17 @@ func getDefaultBrowserProgID() (string, error) {
 }
 
 func DefaultBrowser() (BrowserType, error) {
-	browser, err := getDefaultBrowserProgID()
+	id, err := getDefaultBrowserProgID()
 	if err != nil {
-		return -1, err
+		return UNDEFINED, err
 	}
 
-	for key := range idMap {
-		matches, err := regexp.MatchString(key, browser)
-		if err != nil {
-			return -1, err
-		}
-
-		if matches {
-			return idMap[key], nil
-		}
+	browser := filterBrowserIDMap(id, idMap)
+	if browser == UNDEFINED {
+		return UNDEFINED, &UnknownBrowserType{}
 	}
 
-	return -1, &UnknownBrowserType{}
+	return browser, nil
 }
 
 func GetBrowserPath() (string, error) {
