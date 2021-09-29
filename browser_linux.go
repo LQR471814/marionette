@@ -3,7 +3,6 @@ package marionette
 import (
 	"fmt"
 	"os/exec"
-	"regexp"
 	"strings"
 )
 
@@ -18,23 +17,17 @@ var idMap map[string]BrowserType = map[string]BrowserType{
 }
 
 func DefaultBrowser() (BrowserType, error) {
-	defaultBrowser, err := exec.Command("xdg-settings", "get", "default-web-browser").Output()
+	id, err := exec.Command("xdg-settings", "get", "default-web-browser").Output()
 	if err != nil {
 		return UNDEFINED, err
 	}
 
-	for key := range idMap {
-		matches, err := regexp.MatchString(key, string(defaultBrowser))
-		if err != nil {
-			return UNDEFINED, err
-		}
-
-		if matches {
-			return idMap[key], nil
-		}
+	browser := filterBrowserIDMap(string(id), idMap)
+	if browser == UNDEFINED {
+		return UNDEFINED, &UnknownBrowserType{}
 	}
 
-	return UNDEFINED, &UnknownBrowserType{}
+	return browser, nil
 }
 
 func GetBrowserPath() (string, error) {
