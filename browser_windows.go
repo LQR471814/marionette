@@ -9,23 +9,50 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-func getDefaultBrowserKey() (registry.Key, error) {
+var idMap map[string]BrowserType = map[string]BrowserType{
+	"Chrome":  CHROME,
+	"Firefox": FIREFOX,
+	"Edge":    EDGE,
+}
+
+func getDefaultBrowserProgID() (string, error) {
 	browserKey, err := registry.OpenKey(
 		registry.CURRENT_USER,
 		`SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice`,
 		registry.QUERY_VALUE,
 	)
 
-	return browserKey, err
-}
-
-func GetBrowserPath() (string, error) {
-	browserKey, err := getDefaultBrowserKey()
 	if err != nil {
 		return "", err
 	}
 
 	progID, _, err := browserKey.GetStringValue("ProgId")
+
+	return progID, err
+}
+
+func DefaultBrowser() (BrowserType, error) {
+	browser, err := getDefaultBrowserProgID()
+	if err != nil {
+		return -1, err
+	}
+
+	for key := range idMap {
+		matches, err := regexp.MatchString(key, browser)
+		if err != nil {
+			return -1, err
+		}
+
+		if matches {
+			return idMap[key], nil
+		}
+	}
+
+	return -1, &UnknownBrowserType{}
+}
+
+func GetBrowserPath() (string, error) {
+	progID, err := getDefaultBrowserProgID()
 	if err != nil {
 		return "", err
 	}
