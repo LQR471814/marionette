@@ -3,7 +3,6 @@ package marionette
 import (
 	"fmt"
 	"os/exec"
-	"regexp"
 	"strings"
 
 	"golang.org/x/sys/windows/registry"
@@ -65,12 +64,7 @@ func GetBrowserPath() (string, error) {
 		return "", err
 	}
 
-	re, err := regexp.Compile(`".*"`)
-	if err != nil {
-		return "", err
-	}
-
-	path := string(re.Find([]byte(pathValue)))
+	path := strings.Split(pathValue, "\"")[1]
 	path = strings.ReplaceAll(path, "\"", "")
 
 	return path, err
